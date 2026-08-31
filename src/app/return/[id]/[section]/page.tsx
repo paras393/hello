@@ -1,0 +1,5 @@
+import {IncomeSection} from "@/components/IncomeSection";
+import {Deductions,Tds,Computation} from "@/components/TaxSections";
+import {Payment,Verification} from "@/components/CompletionSections";
+const map:any={"personal-info":"personal","salary-income":"salary","house-property":"house","capital-gains":"capital","other-sources":"other"};
+export default function Page({params}:{params:{id:string;section:string}}){if(map[params.section])return <IncomeSection id={params.id} section={map[params.section]}/>;if(params.section==="deductions")return <Deductions id={params.id}/>;if(params.section==="tds-reconciliation")return <Tds id={params.id}/>;if(params.section==="tax-computation")return <Computation id={params.id}/>;if(params.section==="payment")return <Payment id={params.id}/>;if(params.section==="e-verification")return <Verification id={params.id}/>;return <div className="mx-auto max-w-2xl px-6 py-24 text-center"><h1 className="text-3xl font-bold">Section coming in next stage</h1><p className="mt-3 text-slate-600">This section is not built yet.</p></div>}

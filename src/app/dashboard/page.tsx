@@ -1,0 +1,1 @@
+import { Dashboard } from "@/components/Dashboard"; export default function Page({searchParams}:{searchParams:{filerId:string;clientId?:string}}){return <Dashboard filerId={searchParams.filerId} clientId={searchParams.clientId}/>}

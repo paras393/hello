@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Filer {
+  id        String   @id @default(cuid())
+  name      String
+  pan       String
+  role      String
+  createdAt DateTime @default(now())
+  clients   Client[]
+  returns   Return[]
+}
+
+model Client {
+  id             String   @id @default(cuid())
+  professionalId String
+  name           String
+  pan            String
+  professional   Filer    @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  returns        Return[]
+
+  @@index([professionalId])
+}
+
+model Return {
+  id                    String          @id @default(cuid())
+  filerId               String
+  clientId              String?
+  assessmentYear        String          @default("2026-27")
+  itrType               String?
+  regimeChosen          String?
+  status                String          @default("draft")
+  data                  String          @default("{}")
+  challanReference      String?
+  challanAmount         Int?
+  challanTax            Int?
+  challanInterest       Int?
+  challanCess           Int?
+  bsrCode               String?
+  challanNumber         String?
+  paymentDate           DateTime?
+  acknowledgementNumber String?
+  verificationMethod    String?
+  verificationDate      DateTime?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  filer                 Filer           @relation(fields: [filerId], references: [id], onDelete: Cascade)
+  client                Client?         @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  personalInfo          PersonalInfo?
+  salaryIncome          SalaryIncome?
+  houseProperties       HouseProperty[]
+  capitalGains          CapitalGain[]
+  otherSources          OtherSource[]
+  deductions            Deduction[]
+  tdsEntries            TdsEntry[]
+  advanceTaxPayments    AdvanceTaxPayment[]
+
+  @@index([filerId, assessmentYear])
+}
+
+model PersonalInfo {
+  id                String   @id @default(cuid())
+  returnId          String   @unique
+  name              String
+  pan               String
+  dateOfBirth       DateTime
+  residentialStatus String
+  bankAccount       String
+  ifsc              String
+  aadhaar           String
+  return            Return   @relation(fields: [returnId], references: [id], onDelete: Cascade)
+}
+
+model SalaryIncome {
+  id                String @id @default(cuid())
+  returnId          String @unique
+  grossSalary       Int    @default(0)
+  hraReceived       Int    @default(0)
+  otherAllowances   Int    @default(0)
+  perquisites       Int    @default(0)
+  profitInLieu      Int    @default(0)
+  rentPaid          Int    @default(0)
+  city              String @default("non-metro")
+  standardDeduction Int    @default(50000)
+  hraExemption      Int    @default(0)
+  return            Return @relation(fields: [returnId], references: [id], onDelete: Cascade)
+}
+
+model HouseProperty {
+  id               String @id @default(cuid())
+  returnId         String
+  propertyType     String
+  annualValue      Int    @default(0)
+  municipalTaxes   Int    @default(0)
+  homeLoanInterest Int    @default(0)
+  income           Int    @default(0)
+  return           Return @relation(fields: [returnId], references: [id], onDelete: Cascade)
+
+  @@index([returnId])
+}
+
+model CapitalGain {
+  id               String   @id @default(cuid())
+  returnId         String
+  assetType        String
+  purchaseDate     DateTime
+  saleDate         DateTime
+  purchaseValue    Int
+  saleValue        Int
+  transferExpenses Int      @default(0)
+  holdingMonths    Int
+  holdingType      String
+  gain             Int
+  return           Return   @relation(fields: [returnId], references: [id], onDelete: Cascade)
+
+  @@index([returnId])
+}
+
+model OtherSource {
+  id          String @id @default(cuid())
+  returnId    String
+  sourceType  String
+  description String
+  amount      Int
+  return      Return @relation(fields: [returnId], references: [id], onDelete: Cascade)
+
+  @@index([returnId])
+}
+
+model Deduction {
+  id               String @id @default(cuid())
+  returnId         String
+  category         String
+  description      String
+  amount           Int
+  qualifyingAmount Int
+  loanStartYear    Int?
+  severity         String?
+  return           Return @relation(fields: [returnId], references: [id], onDelete: Cascade)
+
+  @@index([returnId])
+}
+
+model TdsEntry {
+  id               String  @id
+  returnId         String
+  source           String
+  deductor         String
+  departmentAmount Int
+  userAmount       Int
+  confirmed        Boolean @default(false)
+  return           Return  @relation(fields: [returnId], references: [id], onDelete: Cascade)
+
+  @@index([returnId])
+}
+
+model AdvanceTaxPayment {
+  id          String   @id @default(cuid())
+  returnId    String
+  amount      Int
+  paymentDate DateTime
+  reference   String
+  return      Return   @relation(fields: [returnId], references: [id], onDelete: Cascade)
+
+  @@index([returnId])
+}
